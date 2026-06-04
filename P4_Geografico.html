@@ -2,258 +2,130 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>P4 · Geográfico — C&E Dashboard</title>
+<title>P4 · Geográfico — C&E 2024</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root{--bg:#0D0D0D;--bg2:#141414;--bg3:#1A1A1A;--bg4:#212121;--green:#00923F;--green2:#00C853;--green3:#33A85A;--green4:#1B5E20;--greendim:#00923F22;--greenborder:#00923F55;--text:#F0F0F0;--text2:#A0A0A0;--text3:#606060;--border:#1E1E1E;--border2:#2A2A2A;--radius:10px;--radius-sm:6px}
-*{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",sans-serif}
-body{background:var(--bg);color:var(--text);min-height:100vh;padding:16px}
-.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);border:0.5px solid var(--border2)}
-.logo{background:var(--green);color:#fff;font-size:12px;font-weight:700;padding:4px 9px;border-radius:var(--radius-sm)}
-.ht{font-size:14px;font-weight:600;color:var(--text);margin-left:10px}
-.hs{font-size:10px;color:var(--text2);margin-left:10px;margin-top:1px}
-.ptag{font-size:10px;padding:2px 9px;border-radius:99px;background:var(--greendim);color:var(--green);border:0.5px solid var(--greenborder)}
-.filters{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
-.fl{font-size:10px;color:var(--text3);margin-right:3px}
-.chip{font-size:10px;padding:2px 8px;border-radius:99px;background:var(--bg3);color:var(--text2);border:0.5px solid var(--border2);cursor:pointer;transition:all .15s}
-.chip.on{background:var(--green);color:#fff;border-color:var(--green)}
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
-.kpi{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);padding:12px 14px;position:relative;overflow:hidden}
-.kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--green)}
-.kl{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
-.kv{font-size:18px;font-weight:700;color:var(--text)}
-.ks{font-size:9px;color:var(--text3);margin-top:3px}
-.zona-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px}
-.zona-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);padding:10px 12px;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
-.zona-card:hover,.zona-card.sel{border-left-color:var(--green);background:var(--bg3)}
+:root{--bg:#0D0D0D;--bg2:#141414;--bg3:#1A1A1A;--bg4:#212121;--g1:#00923F;--g2:#00C853;--g4:#1B5E20;--gd:#00923F22;--gb:#00923F55;--tx:#F0F0F0;--tx2:#A0A0A0;--tx3:#606060;--bd:#1E1E1E;--bd2:#2A2A2A;--r:8px}
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",system-ui,sans-serif}
+body{background:var(--bg);color:var(--tx);padding:12px;display:flex;flex-direction:column;gap:10px}
+.hdr{display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:0.5px solid var(--bd2);border-radius:var(--r);padding:10px 14px}
+.hdr-l{display:flex;align-items:center;gap:10px}
+.logo{background:var(--g1);color:#fff;font-size:12px;font-weight:700;padding:4px 9px;border-radius:5px}
+.htitle{font-size:14px;font-weight:600}.hsub{font-size:10px;color:var(--tx2)}
+.ptag{font-size:10px;padding:2px 9px;border-radius:99px;background:var(--gd);color:var(--g1);border:0.5px solid var(--gb)}
+.sg{display:flex;align-items:center;gap:6px;background:var(--bg2);border:0.5px solid var(--bd2);border-radius:var(--r);padding:6px 10px;flex-wrap:wrap}
+.sl{font-size:10px;color:var(--tx3)}
+.chip{font-size:10px;padding:2px 9px;border-radius:99px;background:var(--bg3);color:var(--tx2);border:0.5px solid var(--bd2);cursor:pointer;transition:all .12s}
+.chip.on{background:var(--g1);color:#fff;border-color:var(--g1)}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media(min-width:600px){.kpis{grid-template-columns:repeat(4,1fr)}}
+.kpi{background:var(--bg2);border:0.5px solid var(--bd2);border-radius:var(--r);padding:10px 12px;border-top:2px solid var(--g1)}
+.kl{font-size:9px;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.kv{font-size:16px;font-weight:700;color:var(--tx)}.ks{font-size:9px;color:var(--g2);margin-top:2px}
+.zona-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media(min-width:700px){.zona-grid{grid-template-columns:repeat(5,1fr)}}
+.zcard{background:var(--bg2);border:0.5px solid var(--bd2);border-radius:var(--r);padding:10px 12px;border-left:3px solid var(--g1)}
 .zn{font-size:11px;font-weight:600;margin-bottom:3px}
 .zv{font-size:16px;font-weight:700}
-.zp{font-size:9px;color:var(--text3);margin-top:2px}
-.row-mid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.row-bot{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);padding:13px}
-.ct{font-size:10px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.zp{font-size:9px;color:var(--tx3);margin-top:2px}
+.row2{display:grid;grid-template-columns:1fr;gap:8px}
+@media(min-width:700px){.row2{grid-template-columns:1fr 1fr}}
+.card{background:var(--bg2);border:0.5px solid var(--bd2);border-radius:var(--r);padding:12px}
+.ct{font-size:10px;font-weight:500;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
 .bar-row{display:flex;align-items:center;gap:7px;margin-bottom:5px}
-.bar-label{font-size:10px;color:var(--text2);width:90px;text-align:right;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bar-track{flex:1;background:var(--bg4);border-radius:3px;height:14px;overflow:hidden}
-.bar-fill{height:100%;border-radius:3px}
-.bar-val{font-size:10px;color:var(--text2);width:50px;text-align:right;flex-shrink:0}
+.bn{font-size:10px;color:var(--tx2);width:95px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+.bt{flex:1;background:var(--bg4);border-radius:3px;height:13px;overflow:hidden}
+.bf{height:100%;border-radius:3px}
+.bv{font-size:10px;color:var(--tx2);width:52px;text-align:right;flex-shrink:0}
 .tbl{width:100%;border-collapse:collapse}
-.tbl th{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;padding:3px 4px;border-bottom:0.5px solid var(--border2);font-weight:400;text-align:left}
-.tbl td{font-size:10px;color:var(--text);padding:4px 4px}
-.tbl tr:not(:last-child) td{border-bottom:0.5px solid var(--border)}
+.tbl th{font-size:9px;color:var(--tx3);padding:3px 4px;border-bottom:0.5px solid var(--bd2);font-weight:400;text-align:left}
+.tbl td{font-size:10px;color:var(--tx);padding:4px 4px}
+.tbl tr:not(:last-child) td{border-bottom:0.5px solid var(--bd)}
 .tbl td.r{text-align:right}
-.pct-bar{display:inline-block;height:5px;border-radius:3px;background:var(--green);vertical-align:middle;margin-left:4px}
-
-/* ── RESPONSIVE FIX ── */
-body { min-height: 100vh; padding: 12px; }
-.kpi-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important; }
-.row2 { grid-template-columns: 1fr !important; }
-.row3 { grid-template-columns: 1fr !important; }
-.row-main { grid-template-columns: 1fr !important; }
-.row-top { grid-template-columns: 1fr !important; }
-.row-bot { grid-template-columns: 1fr !important; }
-.row-mid { grid-template-columns: 1fr !important; }
-.zona-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important; }
-.controls { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important; }
-@media (min-width: 900px) {
-  .row2    { grid-template-columns: 2fr 1fr !important; }
-  .row3    { grid-template-columns: 1fr 1fr 1fr !important; }
-  .row-main{ grid-template-columns: 1fr 1fr !important; }
-  .row-top { grid-template-columns: 1fr 1fr !important; }
-  .row-bot { grid-template-columns: 1fr 1fr !important; }
-  .row-mid { grid-template-columns: 1fr 1fr !important; }
-  .zona-grid{ grid-template-columns: repeat(5,1fr) !important; }
-  .controls { grid-template-columns: 1fr 1fr 1fr 1fr !important; }
-}
-canvas { max-width: 100% !important; }
 </style>
 </head>
 <body>
-<div class="header">
-  <div style="display:flex;align-items:center">
-    <div class="logo">C&E</div>
-    <div><div class="ht">Análisis Geográfico</div><div class="hs">Zona · Provincia · Local · POS Tipo · 2024</div></div>
+<div class="hdr">
+  <div class="hdr-l"><div class="logo">C&E</div><div><div class="htitle">Análisis Geográfico</div><div class="hsub">Zona · Provincia · Local · POS Tipo · 2024</div></div></div>
+  <div class="ptag">Página 4 · 5</div>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+  <div class="sg"><span class="sl">POS TIPO</span>
+    <span class="chip on" onclick="setP('todos',this)">Todos</span>
+    <span class="chip" onclick="setP('MULTIMARCA',this)">Multimarca</span>
+    <span class="chip" onclick="setP('LOCALES',this)">4N</span>
+    <span class="chip" onclick="setP('E-COMMERCE',this)">E-Commerce</span>
   </div>
-  <div style="display:flex;align-items:center;gap:8px"><div class="ptag">Página 4 / 5</div></div>
 </div>
-
-<div class="filters">
-  <span class="fl">POS TIPO:</span>
-  <span class="chip on" onclick="setP('todos',this)">Todos</span>
-  <span class="chip" onclick="setP('MULTIMARCA',this)">Multimarca</span>
-  <span class="chip" onclick="setP('LOCALES',this)">Locales 4N</span>
-  <span class="chip" onclick="setP('E-COMMERCE',this)">E-Commerce</span>
-  <span class="chip" onclick="setP('CASA CENTRAL',this)">Casa Central</span>
-</div>
-
-<div class="kpi-grid">
-  <div class="kpi"><div class="kl">Zona líder</div><div class="kv">AMBA SUR</div><div class="ks">$5.675M · 44.9%</div></div>
-  <div class="kpi"><div class="kl">Locales activos</div><div class="kv" id="kloc">12</div><div class="ks">puntos de venta</div></div>
-  <div class="kpi"><div class="kl">Provincias alcanzadas</div><div class="kv">23</div><div class="ks">con ventas registradas</div></div>
+<div class="kpis">
+  <div class="kpi"><div class="kl">Zona líder</div><div class="kv" style="font-size:13px">AMBA SUR</div><div class="ks">$5.675M · 44.9%</div></div>
+  <div class="kpi"><div class="kl">Locales</div><div class="kv">12</div><div class="ks">puntos de venta</div></div>
+  <div class="kpi"><div class="kl">Provincias</div><div class="kv">23</div><div class="ks">alcanzadas</div></div>
   <div class="kpi"><div class="kl">E-Commerce</div><div class="kv">$2.429M</div><div class="ks">19.2% del total</div></div>
 </div>
-
-<div class="zona-grid" id="zona-cards"></div>
-
-<div class="row-mid">
-  <div class="card">
-    <div class="ct">Ventas por zona y POS tipo</div>
-    <canvas id="stackedBar" height="160"></canvas>
-  </div>
-  <div class="card">
-    <div class="ct">Evolución mensual por zona</div>
-    <canvas id="lineZona" height="160"></canvas>
+<div class="zona-grid">
+  <div class="zcard" style="border-left-color:#00923F"><div class="zn" style="color:#00923F">AMBA SUR</div><div class="zv" style="color:#00923F">$5.675M</div><div class="zp">44.9% · 64.748 tickets</div></div>
+  <div class="zcard" style="border-left-color:#00C853"><div class="zn" style="color:#00C853">CAP. FEDERAL</div><div class="zv" style="color:#00C853">$4.271M</div><div class="zp">33.8% · 45.256 tickets</div></div>
+  <div class="zcard" style="border-left-color:#33A85A"><div class="zn" style="color:#33A85A">AMBA</div><div class="zv" style="color:#33A85A">$1.256M</div><div class="zp">9.9% · 10.171 tickets</div></div>
+  <div class="zcard" style="border-left-color:#1B5E20"><div class="zn" style="color:#1B5E20">AMBA NORTE</div><div class="zv" style="color:#1B5E20">$751.7K</div><div class="zp">5.9% · 8.579 tickets</div></div>
+  <div class="zcard" style="border-left-color:#66BB6A"><div class="zn" style="color:#66BB6A">AMBA OESTE</div><div class="zv" style="color:#66BB6A">$696.1K</div><div class="zp">5.5% · 8.330 tickets</div></div>
+</div>
+<div class="row2">
+  <div class="card"><div class="ct">Ventas por zona y POS tipo</div><canvas id="stackChart" height="220"></canvas></div>
+  <div class="card"><div class="ct">Evolución mensual por zona</div><canvas id="lineChart" height="220"></canvas></div>
+</div>
+<div class="row2">
+  <div class="card"><div class="ct">Top 10 locales</div><div id="topLocales"></div></div>
+  <div class="card"><div class="ct">Detalle por zona y provincia</div>
+    <table class="tbl"><thead><tr><th>Zona</th><th>Provincia</th><th class="r">Ventas</th><th class="r">Tickets</th><th class="r">%</th></tr></thead>
+    <tbody id="tblGeo"></tbody></table>
   </div>
 </div>
-
-<div class="row-bot">
-  <div class="card">
-    <div class="ct">Top 10 locales</div>
-    <div id="top-locales"></div>
-  </div>
-  <div class="card">
-    <div class="ct">Detalle por zona y provincia</div>
-    <table class="tbl">
-      <thead><tr><th>Zona</th><th>Provincia</th><th class="r">Ventas</th><th class="r">Tickets</th><th class="r">T.prom</th><th>% total</th></tr></thead>
-      <tbody id="tbl-geo"></tbody>
-    </table>
-  </div>
-</div>
-
 <script>
-const ZONAS=[
-  {z:'AMBA SUR',v:5675132000,t:64748,c:'#00923F'},
-  {z:'CAP. FEDERAL',v:4271592441,t:45256,c:'#00C853'},
-  {z:'AMBA',v:1256715498,t:10171,c:'#33A85A'},
-  {z:'AMBA NORTE',v:751735188,t:8579,c:'#1B5E20'},
-  {z:'AMBA OESTE',v:696138682,t:8330,c:'#66BB6A'}
-];
-const POS=[
+const POS_DATA=[
   {z:'AMBA SUR',pos:'MULTIMARCA',v:3121529422},{z:'AMBA SUR',pos:'LOCALES',v:2553602578},
   {z:'CAP. FEDERAL',pos:'E-COMMERCE',v:2429523741},{z:'CAP. FEDERAL',pos:'MULTIMARCA',v:1842068700},
-  {z:'AMBA',pos:'CASA CENTRAL',v:1256715498},{z:'AMBA NORTE',pos:'MULTIMARCA',v:751735188},
-  {z:'AMBA OESTE',pos:'MULTIMARCA',v:696138682}
+  {z:'AMBA',pos:'CASA CENTRAL',v:1256715498},{z:'AMBA NORTE',pos:'MULTIMARCA',v:751735188},{z:'AMBA OESTE',pos:'MULTIMARCA',v:696138682}
 ];
 const LOCALES=[
-  {n:'E-COMMERCE',z:'CAP. FEDERAL',v:2330588728,t:23991},
-  {n:'CASA CENTRAL',z:'AMBA',v:1256715498,t:10171},
-  {n:'BERAZATEGUI',z:'CAP. FEDERAL',v:1028093016,t:11715},
-  {n:'GLEW (4N)',z:'AMBA SUR',v:972746871,t:11265},
-  {n:'EZEIZA',z:'AMBA SUR',v:908269768,t:9623},
-  {n:'SOLANO',z:'AMBA SUR',v:895599445,t:8837},
-  {n:'CONSTITUCION',z:'CAP. FEDERAL',v:813975683,t:15363},
-  {n:'VARELA (4N)',z:'AMBA SUR',v:799505355,t:10115},
-  {n:'BURZACO (4N)',z:'AMBA SUR',v:781350351,t:10848},
-  {n:'MORENO',z:'AMBA NORTE',v:751735188,t:8612},
+  {n:'E-COMMERCE',z:'CAP. FEDERAL',v:2330588728},{n:'CASA CENTRAL',z:'AMBA',v:1256715498},
+  {n:'BERAZATEGUI',z:'CAP. FEDERAL',v:1028093016},{n:'GLEW (4N)',z:'AMBA SUR',v:972746871},
+  {n:'EZEIZA',z:'AMBA SUR',v:908269768},{n:'SOLANO',z:'AMBA SUR',v:895599445},
+  {n:'CONSTITUCION',z:'CAP. FEDERAL',v:813975683},{n:'VARELA (4N)',z:'AMBA SUR',v:799505355},
+  {n:'BURZACO (4N)',z:'AMBA SUR',v:781350351},{n:'MORENO',z:'AMBA NORTE',v:751735188},
 ];
-const EVOL_Z={
-  'AMBA SUR':[173742442,188798654,257656152,278439657,359335998,437014563,528347058,816191088,784604544,618925957,555740260,676335621],
-  'CAP. FEDERAL':[87553603,202143960,218770459,227557908,332989566,324568491,393723106,475702572,430179464,473214224,518031085,587157998],
-  'AMBA':[71440267,65362419,67855898,62193557,77670898,98313564,113682214,170125467,138829648,137012858,125942925,128285777],
-  'AMBA NORTE':[15303291,24723472,25998293,32784832,44112473,71769963,86706402,109943025,111211935,73659656,77204191,78317648],
-  'AMBA OESTE':[16972042,18577288,32609554,33042040,41143563,43577324,67994099,75275200,80202200,95660355,87018157,104066853]
-};
+const EVOL_Z={'AMBA SUR':[173742442,188798654,257656152,278439657,359335998,437014563,528347058,816191088,784604544,618925957,555740260,676335621],'CAP. FEDERAL':[87553603,202143960,218770459,227557908,332989566,324568491,393723106,475702572,430179464,473214224,518031085,587157998],'AMBA':[71440267,65362419,67855898,62193557,77670898,98313564,113682214,170125467,138829648,137012858,125942925,128285777],'AMBA NORTE':[15303291,24723472,25998293,32784832,44112473,71769963,86706402,109943025,111211935,73659656,77204191,78317648],'AMBA OESTE':[16972042,18577288,32609554,33042040,41143563,43577324,67994099,75275200,80202200,95660355,87018157,104066853]};
+const GEO=[{z:'AMBA SUR',p:'BUENOS AIRES',v:5637427729,t:64205},{z:'CAP. FEDERAL',p:'BUENOS AIRES',v:2943830206,t:37924},{z:'AMBA NORTE',p:'BUENOS AIRES',v:745426948,t:8524},{z:'AMBA OESTE',p:'BUENOS AIRES',v:691063098,t:8189},{z:'CAP. FEDERAL',p:'CABA',v:410255316,t:4764},{z:'AMBA',p:'BUENOS AIRES',v:324156420,t:3533},{z:'CAP. FEDERAL',p:'CÓRDOBA',v:179943937,t:2011},{z:'AMBA',p:'MISIONES',v:171922991,t:799},{z:'CAP. FEDERAL',p:'SANTA FE',v:134741832,t:1579},{z:'AMBA',p:'CABA',v:126478432,t:1028}];
 const ML=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-const GEO=[
-  {zona:'AMBA SUR',prov:'BUENOS AIRES',v:5637427729,t:64205},
-  {zona:'CAP. FEDERAL',prov:'BUENOS AIRES',v:2943830206,t:37924},
-  {zona:'AMBA NORTE',prov:'BUENOS AIRES',v:745426948,t:8524},
-  {zona:'AMBA OESTE',prov:'BUENOS AIRES',v:691063098,t:8189},
-  {zona:'CAP. FEDERAL',prov:'CABA',v:410255316,t:4764},
-  {zona:'AMBA',prov:'BUENOS AIRES',v:324156420,t:3533},
-  {zona:'CAP. FEDERAL',prov:'CÓRDOBA',v:179943937,t:2011},
-  {zona:'AMBA',prov:'MISIONES',v:171922991,t:799},
-  {zona:'CAP. FEDERAL',prov:'SANTA FE',v:134741832,t:1579},
-  {zona:'AMBA',prov:'CABA',v:126478432,t:1028},
-];
+const ZC={'AMBA SUR':'#00923F','CAP. FEDERAL':'#00C853','AMBA':'#33A85A','AMBA NORTE':'#1B5E20','AMBA OESTE':'#66BB6A'};
 const fmt=v=>v>=1e9?'$'+(v/1e9).toFixed(2)+'B':v>=1e6?'$'+(v/1e6).toFixed(1)+'M':'$'+(v/1e3).toFixed(0)+'K';
 const fN=v=>new Intl.NumberFormat('es-AR').format(Math.round(v));
-const totalAll=ZONAS.reduce((s,d)=>s+d.v,0);
-let stackChart,lineChart;
-
-function buildZonaCards(){
-  document.getElementById('zona-cards').innerHTML=ZONAS.map(z=>`
-    <div class="zona-card" style="border-left-color:${z.c}" onclick="">
-      <div class="zn" style="color:${z.c}">${z.z}</div>
-      <div class="zv" style="color:${z.c}">${fmt(z.v)}</div>
-      <div class="zp">${Math.round(z.v/totalAll*100)}% · ${fN(z.t)} tickets</div>
-    </div>`).join('');
-}
+const totAll=GEO.reduce((s,d)=>s+d.v,0);
+let SC2,LC2;
 
 function buildStacked(){
-  const ctx=document.getElementById('stackedBar').getContext('2d');
-  if(stackChart)stackChart.destroy();
-  const zonas=[...new Set(POS.map(d=>d.z))];
-  const posTypes=[...new Set(POS.map(d=>d.pos))];
-  const posColors={'MULTIMARCA':'#00923F','LOCALES':'#00C853','E-COMMERCE':'#33A85A','CASA CENTRAL':'#1B5E20'};
-  stackChart=new Chart(ctx,{type:'bar',data:{labels:zonas,
-    datasets:posTypes.map(p=>({
-      label:p,data:zonas.map(z=>{const r=POS.find(d=>d.z===z&&d.pos===p);return r?r.v:0}),
-      backgroundColor:posColors[p]+'CC',borderWidth:0,borderRadius:3
-    }))
-  },options:{responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:true,position:'bottom',labels:{color:'#A0A0A0',boxWidth:7,font:{size:9},padding:6}}},
-    scales:{
-      x:{stacked:true,grid:{color:'#1E1E1E'},ticks:{color:'#606060',font:{size:9}},border:{color:'#2A2A2A'}},
-      y:{stacked:true,grid:{color:'#1E1E1E'},ticks:{color:'#606060',font:{size:9},callback:v=>'$'+Math.round(v/1e6)+'M'},border:{color:'#2A2A2A'}}
-    }
-  }});
+  const ctx=document.getElementById('stackChart').getContext('2d');
+  if(SC2)SC2.destroy();
+  const zonas=[...new Set(POS_DATA.map(d=>d.z))];
+  const posTypes=[...new Set(POS_DATA.map(d=>d.pos))];
+  const posC={'MULTIMARCA':'#00923F','LOCALES':'#00C853','E-COMMERCE':'#33A85A','CASA CENTRAL':'#1B5E20'};
+  SC2=new Chart(ctx,{type:'bar',data:{labels:zonas,datasets:posTypes.map(p=>({label:p,data:zonas.map(z=>{const r=POS_DATA.find(d=>d.z===z&&d.pos===p);return r?r.v:0}),backgroundColor:posC[p]+'CC',borderWidth:0,borderRadius:2}))},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:true,position:'bottom',labels:{color:'#A0A0A0',boxWidth:7,font:{size:9},padding:6}}},scales:{x:{stacked:true,grid:{color:'#1E1E1E'},ticks:{color:'#606060',font:{size:9}},border:{color:'#2A2A2A'}},y:{stacked:true,grid:{color:'#1E1E1E'},ticks:{color:'#606060',font:{size:9},callback:v=>'$'+Math.round(v/1e6)+'M'},border:{color:'#2A2A2A'}}}}});
 }
-
 function buildLine(){
-  const ctx=document.getElementById('lineZona').getContext('2d');
-  if(lineChart)lineChart.destroy();
+  const ctx=document.getElementById('lineChart').getContext('2d');
+  if(LC2)LC2.destroy();
   const cols=['#00923F','#00C853','#33A85A','#1B5E20','#66BB6A'];
-  lineChart=new Chart(ctx,{type:'line',data:{labels:ML,
-    datasets:Object.keys(EVOL_Z).map((k,i)=>({
-      label:k,data:EVOL_Z[k],borderColor:cols[i],backgroundColor:'transparent',
-      borderWidth:1.5,pointRadius:2,tension:0.3
-    }))
-  },options:{responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:true,position:'bottom',labels:{color:'#A0A0A0',boxWidth:7,font:{size:9},padding:6}}},
-    scales:{
-      x:{grid:{color:'#1E1E1E'},ticks:{color:'#606060',font:{size:9}},border:{color:'#2A2A2A'}},
-      y:{grid:{color:'#1E1E1E'},ticks:{color:'#606060',font:{size:9},callback:v=>'$'+Math.round(v/1e6)+'M'},border:{color:'#2A2A2A'}}
-    }
-  }});
+  LC2=new Chart(ctx,{type:'line',data:{labels:ML,datasets:Object.keys(EVOL_Z).map((k,i)=>({label:k,data:EVOL_Z[k],borderColor:cols[i],backgroundColor:'transparent',borderWidth:1.5,pointRadius:2,tension:0.3}))},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:true,position:'bottom',labels:{color:'#A0A0A0',boxWidth:7,font:{size:9},padding:6}}},scales:{x:{grid:{color:'#1E1E1E'},ticks:{color:'#606060',font:{size:9}},border:{color:'#2A2A2A'}},y:{grid:{color:'#1E1E1E'},ticks:{color:'#606060',font:{size:9},callback:v=>'$'+Math.round(v/1e6)+'M'},border:{color:'#2A2A2A'}}}}});
 }
-
 function buildLocales(data){
   const maxV=Math.max(...data.map(d=>d.v));
-  const cols={'AMBA SUR':'#00923F','CAP. FEDERAL':'#00C853','AMBA':'#33A85A','AMBA NORTE':'#1B5E20','AMBA OESTE':'#66BB6A'};
-  document.getElementById('top-locales').innerHTML=data.map(d=>`
-    <div class="bar-row">
-      <div class="bar-label">${d.n}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(d.v/maxV*100)}%;background:${cols[d.z]||'#00923F'}"></div></div>
-      <div class="bar-val">${fmt(d.v)}</div>
-    </div>`).join('');
+  document.getElementById('topLocales').innerHTML=data.map(d=>`<div class="bar-row"><div class="bn">${d.n}</div><div class="bt"><div class="bf" style="width:${Math.round(d.v/maxV*100)}%;background:${ZC[d.z]||'#00923F'}"></div></div><div class="bv">${fmt(d.v)}</div></div>`).join('');
 }
-
 function buildTable(){
-  const tot=GEO.reduce((s,d)=>s+d.v,0);
-  const cols={'AMBA SUR':'#00923F','CAP. FEDERAL':'#00C853','AMBA':'#33A85A','AMBA NORTE':'#1B5E20','AMBA OESTE':'#66BB6A'};
-  document.getElementById('tbl-geo').innerHTML=GEO.map(d=>{
-    const pct=d.v/tot*100;
-    return `<tr>
-      <td style="color:${cols[d.zona]||'#00923F'};font-weight:500">${d.zona}</td>
-      <td>${d.prov}</td>
-      <td class="r">${fmt(d.v)}</td>
-      <td class="r">${fN(d.t)}</td>
-      <td class="r">${fmt(Math.round(d.v/d.t))}</td>
-      <td><span style="font-size:10px;color:var(--green2);font-weight:500">${pct.toFixed(1)}%</span><span class="pct-bar" style="width:${Math.round(pct*2.5)}px"></span></td>
-    </tr>`;
-  }).join('');
+  document.getElementById('tblGeo').innerHTML=GEO.map(d=>`<tr><td style="color:${ZC[d.z]||'#00923F'};font-weight:500">${d.z}</td><td>${d.p}</td><td class="r">${fmt(d.v)}</td><td class="r">${fN(d.t)}</td><td class="r" style="color:var(--g2)">${(d.v/totAll*100).toFixed(1)}%</td></tr>`).join('');
 }
-
-function setP(p,el){
-  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
-  el.classList.add('on');
-  const data=p==='todos'?LOCALES:LOCALES.filter(l=>l.pos===p||true);
-  buildLocales(data);
-}
-
-buildZonaCards();buildStacked();buildLine();buildLocales(LOCALES);buildTable();
+function setP(p,el){document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');buildLocales(LOCALES);}
+buildStacked();buildLine();buildLocales(LOCALES);buildTable();
 </script>
 </body>
 </html>
