@@ -1,8 +1,0 @@
-{
-  "version": 2,
-  "name": "cye-dashboard-2024",
-  "routes": [
-    {"src": "/", "dest": "/index.html"},
-    {"src": "/(.*)", "dest": "/$1"}
-  ]
-}
