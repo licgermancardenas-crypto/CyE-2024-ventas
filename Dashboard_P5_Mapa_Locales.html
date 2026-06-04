@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa Interactivo de Locales — ATLAS Analytics 2024</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+body{background:#f0efe9;color:#3d3d3a;overflow:hidden}
+.app{display:grid;grid-template-columns:300px 1fr;height:100vh}
+.panel{background:#fff;border-right:0.5px solid #e0deda;display:flex;flex-direction:column;overflow:hidden}
+.panel-header{padding:14px 16px;border-bottom:0.5px solid #e0deda;flex-shrink:0}
+.page-pill{background:#3C3489;color:#fff;font-size:10px;font-weight:500;padding:3px 10px;border-radius:99px;display:inline-block;margin-bottom:6px}
+.panel-title{font-size:14px;font-weight:500;color:#1a1a18}
+.panel-sub{font-size:11px;color:#888780;margin-top:1px}
+.ctrl-section{padding:10px 14px;border-bottom:0.5px solid #f0efe9;flex-shrink:0}
+.ctrl-label{font-size:9px;font-weight:500;color:#888780;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px}
+.chips{display:flex;flex-wrap:wrap;gap:3px}
+.chip{font-size:10px;padding:2px 8px;border-radius:99px;background:#f0efe9;color:#73726c;border:0.5px solid #d3d1c7;cursor:pointer;transition:all .12s;white-space:nowrap}
+.chip:hover{background:#e4e2db}
+.chip.on{background:#3C3489;color:#fff;border-color:#3C3489}
+.medida-row{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;padding:8px 14px;border-bottom:0.5px solid #f0efe9;flex-shrink:0}
+.mb{font-size:10px;padding:4px 2px;border-radius:5px;border:0.5px solid #d3d1c7;background:#f8f7f3;cursor:pointer;text-align:center;color:#73726c;transition:all .12s}
+.mb.on{background:#3C3489;color:#fff;border-color:#3C3489}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 14px;border-bottom:0.5px solid #f0efe9;flex-shrink:0}
+.kpi{background:#f8f7f3;border-radius:7px;padding:8px 10px}
+.kpi-lbl{font-size:9px;color:#888780;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.kpi-val{font-size:16px;font-weight:500;color:#1a1a18;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi-sub{font-size:9px;color:#b4b2a9;margin-top:1px}
+.list{flex:1;overflow-y:auto;padding:6px 8px}
+.lcard{padding:8px 10px;border-radius:8px;cursor:pointer;margin-bottom:3px;border:1.5px solid transparent;transition:all .12s}
+.lcard:hover{background:#f8f7f3}
+.lcard.sel{border-color:#3C3489;background:#f0effc}
+.ltop{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.ldot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.lname{font-size:11px;font-weight:500;color:#1a1a18;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrank{font-size:10px;font-weight:500}
+.lbar{height:3px;background:#e4e2db;border-radius:2px;margin:3px 0 4px}
+.lbarfill{height:100%;border-radius:2px;transition:width .4s}
+.lstats{display:flex;gap:10px;flex-wrap:wrap}
+.lstat{font-size:9px;color:#888780}
+.lstat b{color:#3d3d3a;font-weight:500}
+.laddr{font-size:9px;color:#b4b2a9;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* mapa */
+.map-wrap{position:relative}
+#map{width:100%;height:100vh}
+.map-legend{position:absolute;top:12px;right:12px;background:#fff;border-radius:10px;padding:10px 12px;z-index:999;border:0.5px solid #e0deda;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.leg-t{font-size:9px;font-weight:500;color:#888780;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.leg-r{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.leg-d{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.leg-l{font-size:10px;color:#3d3d3a}
+/* detail */
+.det{position:absolute;bottom:14px;right:14px;background:#fff;border-radius:12px;padding:14px;box-shadow:0 4px 28px rgba(0,0,0,.14);width:250px;z-index:1000;display:none;border:0.5px solid #e0deda}
+.det.vis{display:block}
+.det-hdr{display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:0.5px solid #f0efe9}
+.det-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;margin-top:2px}
+.det-name{font-size:12px;font-weight:500;color:#1a1a18;line-height:1.3}
+.det-zone{font-size:10px;color:#888780}
+.det-addr{font-size:9px;color:#b4b2a9;margin-top:2px}
+.det-kpis{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.dk{background:#f8f7f3;border-radius:6px;padding:7px 8px}
+.dk-lbl{font-size:9px;color:#888780;margin-bottom:2px}
+.dk-val{font-size:14px;font-weight:500;color:#1a1a18}
+.det-chart-t{font-size:9px;color:#888780;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.close-btn{position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;color:#b4b2a9;font-size:15px;line-height:1;padding:0}
+.close-btn:hover{color:#3d3d3a}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="panel">
+  <div class="panel-header">
+    <span class="page-pill">Página 5 · Mapa</span>
+    <div class="panel-title">Locales por performance</div>
+    <div class="panel-sub">12 puntos de venta + e-commerce · 2024</div>
+  </div>
+
+  <div class="ctrl-section">
+    <div class="ctrl-label">Zona</div>
+    <div class="chips" id="zc">
+      <span class="chip on" onclick="fZ('todas',this)">Todas</span>
+      <span class="chip" onclick="fZ('AMBA SUR',this)">AMBA Sur</span>
+      <span class="chip" onclick="fZ('CAPITAL FEDERAL',this)">Cap. Federal</span>
+      <span class="chip" onclick="fZ('AMBA',this)">AMBA</span>
+      <span class="chip" onclick="fZ('AMBA NORTE',this)">AMBA Norte</span>
+      <span class="chip" onclick="fZ('AMBA OESTE',this)">AMBA Oeste</span>
+    </div>
+  </div>
+
+  <div class="ctrl-section">
+    <div class="ctrl-label">Tipo de local</div>
+    <div class="chips" id="pc">
+      <span class="chip on" onclick="fP('todos',this)">Todos</span>
+      <span class="chip" onclick="fP('MULTIMARCA',this)">Multimarca</span>
+      <span class="chip" onclick="fP('LOCALES',this)">4N</span>
+      <span class="chip" onclick="fP('E-COMMERCE',this)">E-Commerce</span>
+      <span class="chip" onclick="fP('CASA CENTRAL',this)">Casa Central</span>
+    </div>
+  </div>
+
+  <div class="medida-row">
+    <button class="mb on" onclick="fM('ventas',this)">Ventas $</button>
+    <button class="mb" onclick="fM('tickets',this)">Tickets</button>
+    <button class="mb" onclick="fM('unidades',this)">Unid.</button>
+    <button class="mb" onclick="fM('tprom',this)">T. prom.</button>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-lbl">Total ventas</div><div class="kpi-val" id="kv">—</div><div class="kpi-sub" id="klc">—</div></div>
+    <div class="kpi"><div class="kpi-lbl">Tickets</div><div class="kpi-val" id="kt">—</div><div class="kpi-sub">transacciones</div></div>
+    <div class="kpi"><div class="kpi-lbl">Local líder</div><div class="kpi-val" style="font-size:11px;line-height:1.3" id="kl">—</div><div class="kpi-sub" id="klv">—</div></div>
+    <div class="kpi"><div class="kpi-lbl">Ticket prom.</div><div class="kpi-val" id="ktp">—</div><div class="kpi-sub">por transacción</div></div>
+  </div>
+
+  <div class="list" id="list"></div>
+</div>
+
+<div class="map-wrap">
+  <div id="map"></div>
+
+  <div class="map-legend">
+    <div class="leg-t">Zona</div>
+    <div class="leg-r"><div class="leg-d" style="background:#185FA5"></div><span class="leg-l">AMBA Sur</span></div>
+    <div class="leg-r"><div class="leg-d" style="background:#0F6E56"></div><span class="leg-l">Cap. Federal / CABA</span></div>
+    <div class="leg-r"><div class="leg-d" style="background:#854F0B"></div><span class="leg-l">AMBA (Casa Central)</span></div>
+    <div class="leg-r"><div class="leg-d" style="background:#534AB7"></div><span class="leg-l">AMBA Norte</span></div>
+    <div class="leg-r"><div class="leg-d" style="background:#993C1D"></div><span class="leg-l">AMBA Oeste</span></div>
+    <div style="margin-top:8px;padding-top:6px;border-top:0.5px solid #f0efe9">
+      <div class="leg-t" style="margin-bottom:3px">Tamaño = medida activa</div>
+    </div>
+  </div>
+
+  <div class="det" id="det">
+    <button class="close-btn" onclick="closeDet()">✕</button>
+    <div class="det-hdr">
+      <div class="det-dot" id="d-dot"></div>
+      <div>
+        <div class="det-name" id="d-name">—</div>
+        <div class="det-zone" id="d-zone">—</div>
+        <div class="det-addr" id="d-addr">—</div>
+      </div>
+    </div>
+    <div class="det-kpis">
+      <div class="dk"><div class="dk-lbl">Ventas</div><div class="dk-val" id="d-v">—</div></div>
+      <div class="dk"><div class="dk-lbl">Tickets</div><div class="dk-val" id="d-t">—</div></div>
+      <div class="dk"><div class="dk-lbl">Ticket prom.</div><div class="dk-val" id="d-tp">—</div></div>
+      <div class="dk"><div class="dk-lbl">Unidades</div><div class="dk-val" id="d-u">—</div></div>
+    </div>
+    <div class="det-chart-t">Evolución mensual 2024</div>
+    <canvas id="d-chart" height="75"></canvas>
+  </div>
+</div>
+</div>
+
+<script>
+const ZC = {'AMBA SUR':'#185FA5','CAPITAL FEDERAL':'#0F6E56','AMBA':'#854F0B','AMBA NORTE':'#534AB7','AMBA OESTE':'#993C1D'};
+const PI = {'MULTIMARCA':'🏪','LOCALES':'🏬','E-COMMERCE':'💻','CASA CENTRAL':'🏢'};
+const ML = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+// Datos con coordenadas exactas basadas en las direcciones reales
+const LOCS = [
+  {
+    n:'E-COMMERCE', zona:'CAPITAL FEDERAL', pos:'E-COMMERCE',
+    addr:'Online — Operación digital',
+    lat:-34.6037, lng:-58.3816,
+    v:2330588728, t:23991, u:23350,
+    meses:[87553603,202143960,218770459,227557908,332989566,324568491,393723106,475702572,430179464,473214224,518031085,587157998]
+  },
+  {
+    n:'CASA CENTRAL', zona:'AMBA', pos:'CASA CENTRAL',
+    addr:'Barracas · Dr. E. Finochietto 728, CABA',
+    lat:-34.6462, lng:-58.3721,
+    v:1256715498, t:10171, u:15973,
+    meses:[71440267,65362419,67855898,62193557,77670898,98313564,113682214,170125467,138829648,137012858,125942925,128285777]
+  },
+  {
+    n:'CONSTITUCION', zona:'CAPITAL FEDERAL', pos:'MULTIMARCA',
+    addr:'Constitución · Av. Brasil 1128 (subsuelo), CABA',
+    lat:-34.6268, lng:-58.3802,
+    v:813975683, t:15363, u:14380,
+    meses:[45000000,52000000,65000000,68000000,78000000,82000000,92000000,108000000,96000000,78000000,75000000,74975683]
+  },
+  {
+    n:'BERAZATEGUI', zona:'CAPITAL FEDERAL', pos:'MULTIMARCA',
+    addr:'Berazategui · Diag. Lisandro de la Torre 1515',
+    lat:-34.7644, lng:-58.2103,
+    v:1028093016, t:11715, u:10962,
+    meses:[60000000,80000000,90000000,85000000,100000000,95000000,110000000,130000000,115000000,105000000,100000000,108093016]
+  },
+  {
+    n:'EZEIZA', zona:'AMBA SUR', pos:'MULTIMARCA',
+    addr:'Ezeiza · Ramos Mejía 150 (peatonal)',
+    lat:-34.8527, lng:-58.5180,
+    v:908269768, t:9623, u:8504,
+    meses:[50000000,58000000,70000000,75000000,85000000,90000000,100000000,118000000,108000000,90000000,85000000,79269768]
+  },
+  {
+    n:'LOMAS', zona:'AMBA SUR', pos:'MULTIMARCA',
+    addr:'Lomas de Zamora · Boedo 117, Local 2',
+    lat:-34.7578, lng:-58.3961,
+    v:649379782, t:6973, u:6466,
+    meses:[33000000,40000000,50000000,53000000,61000000,66000000,75000000,88000000,80000000,63000000,60000000,80379782]
+  },
+  {
+    n:'SOLANO', zona:'AMBA SUR', pos:'MULTIMARCA',
+    addr:'San Fco. Solano · Calle 898 N° 4418',
+    lat:-34.7785, lng:-58.3075,
+    v:895599445, t:8837, u:8183,
+    meses:[48000000,55000000,68000000,72000000,82000000,88000000,98000000,115000000,106000000,88000000,83000000,92599445]
+  },
+  {
+    n:'MORENO', zona:'AMBA NORTE', pos:'MULTIMARCA',
+    addr:'Moreno · Av. Del Libertador 143',
+    lat:-34.6506, lng:-58.7897,
+    v:751735188, t:8612, u:7546,
+    meses:[15303291,24723472,25998293,32784832,44112473,71769963,86706402,109943025,111211935,73659656,77204191,78317648]
+  },
+  {
+    n:'VARELA (4N)', zona:'AMBA SUR', pos:'LOCALES',
+    addr:'Florencio Varela · Pdte. Juan D. Perón 202',
+    lat:-34.8180, lng:-58.2760,
+    v:799505355, t:10115, u:10223,
+    meses:[42000000,50000000,62000000,65000000,75000000,80000000,90000000,105000000,95000000,78000000,73000000,84505355]
+  },
+  {
+    n:'CRUCE VARELA', zona:'AMBA SUR', pos:'MULTIMARCA',
+    addr:'Florencio Varela · Av. Calchaquí 6477, Local 2',
+    lat:-34.8027, lng:-58.2714,
+    v:668280425, t:7146, u:6519,
+    meses:[35000000,42000000,52000000,55000000,63000000,68000000,78000000,92000000,82000000,65000000,62000000,74280425]
+  },
+  {
+    n:'GLEW (4N)', zona:'AMBA SUR', pos:'LOCALES',
+    addr:'Glew (A. Brown) · Sarmiento y Moreno, Estación',
+    lat:-34.8910, lng:-58.3887,
+    v:972746871, t:11265, u:10933,
+    meses:[55000000,62000000,75000000,80000000,90000000,95000000,105000000,125000000,110000000,95000000,92000000,88746871]
+  },
+  {
+    n:'BURZACO (4N)', zona:'AMBA SUR', pos:'LOCALES',
+    addr:'Burzaco (A. Brown) · Av. Espora 2900 esq. R. Rojas',
+    lat:-34.8198, lng:-58.3924,
+    v:781350351, t:10848, u:10600,
+    meses:[40000000,48000000,60000000,63000000,73000000,78000000,88000000,102000000,92000000,75000000,70000000,92350351]
+  },
+  {
+    n:'MORON', zona:'AMBA OESTE', pos:'MULTIMARCA',
+    addr:'Morón · Pte. D. F. Sarmiento 723',
+    lat:-34.6528, lng:-58.6192,
+    v:696138682, t:8294, u:7406,
+    meses:[16972042,18577288,32609554,33042040,41143563,43577324,67994099,75275200,80202200,95660355,87018157,104066853]
+  }
+];
+
+const fmt = v => {
+  if(v>=1e9) return '$'+(v/1e9).toFixed(2)+'B';
+  if(v>=1e6) return '$'+(v/1e6).toFixed(1)+'M';
+  if(v>=1e3) return '$'+(v/1e3).toFixed(0)+'K';
+  return '$'+Math.round(v).toLocaleString('es-AR');
+};
+const fN = v => new Intl.NumberFormat('es-AR').format(Math.round(v));
+
+let cZ='todas', cP='todos', cM='ventas';
+let markers=[], dChart=null, selName=null;
+
+const map = L.map('map',{zoomControl:true,attributionControl:true})
+  .setView([-34.72,-58.45],10);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+  attribution:'© OpenStreetMap © CARTO',maxZoom:18
+}).addTo(map);
+
+function gval(l){
+  if(cM==='ventas') return l.v;
+  if(cM==='tickets') return l.t;
+  if(cM==='unidades') return l.u;
+  if(cM==='tprom') return l.t>0?l.v/l.t:0;
+  return l.v;
+}
+
+function filtered(){
+  return LOCS.filter(l=>{
+    if(cZ!=='todas'&&l.zona!==cZ) return false;
+    if(cP!=='todos'&&l.pos!==cP) return false;
+    return true;
+  });
+}
+
+function render(){
+  markers.forEach(m=>map.removeLayer(m));
+  markers=[];
+  const fl = filtered();
+  const vals = fl.map(l=>gval(l));
+  const maxV = Math.max(...vals)||1;
+
+  fl.forEach(loc=>{
+    const val = gval(loc);
+    const r = Math.max(12, Math.sqrt(val/maxV)*55);
+    const col = ZC[loc.zona]||'#888780';
+    const circ = L.circleMarker([loc.lat,loc.lng],{
+      radius:r, fillColor:col, color:'#fff', weight:2.5,
+      opacity:1, fillOpacity:loc.n===selName?0.95:0.72
+    }).addTo(map);
+
+    // Label permanente con nombre
+    circ.bindTooltip(
+      `<div style="font-weight:600;font-size:11px">${PI[loc.pos]||'📍'} ${loc.n}</div>
+       <div style="font-size:10px;color:#555;margin-top:2px">${fmt(loc.v)} · ${fN(loc.t)} tickets</div>
+       <div style="font-size:9px;color:#999;margin-top:1px">${loc.addr}</div>`,
+      {permanent:false,direction:'top',className:''}
+    );
+    circ.on('click',()=>showDet(loc));
+    markers.push(circ);
+  });
+
+  renderList(fl,maxV);
+  updateKPIs(fl);
+}
+
+function renderList(fl,maxV){
+  document.getElementById('list').innerHTML = fl.map((l,i)=>{
+    const val=gval(l);
+    const col=ZC[l.zona]||'#888780';
+    return `<div class="lcard${l.n===selName?' sel':''}" id="lc_${i}" onclick="selectL('${l.n}')">
+      <div class="ltop">
+        <div class="ldot" style="background:${col}"></div>
+        <div class="lname">${PI[l.pos]||'📍'} ${l.n}</div>
+        <div class="lrank" style="color:${col}">#${i+1}</div>
+      </div>
+      <div class="lbar"><div class="lbarfill" style="width:${Math.round(val/maxV*100)}%;background:${col}"></div></div>
+      <div class="lstats">
+        <div class="lstat"><b>${fmt(l.v)}</b> vtas</div>
+        <div class="lstat"><b>${fN(l.t)}</b> tkt</div>
+        <div class="lstat"><b>${fmt(Math.round(l.v/l.t))}</b> prom</div>
+      </div>
+      <div class="laddr">${l.addr}</div>
+    </div>`;
+  }).join('');
+}
+
+function updateKPIs(fl){
+  const tv=fl.reduce((s,l)=>s+l.v,0);
+  const tt=fl.reduce((s,l)=>s+l.t,0);
+  const li=fl[0];
+  document.getElementById('kv').textContent=fmt(tv);
+  document.getElementById('kt').textContent=fN(tt);
+  document.getElementById('klc').textContent=`${fl.length} locales`;
+  document.getElementById('kl').textContent=li?.n||'—';
+  document.getElementById('klv').textContent=li?fmt(li.v):'—';
+  document.getElementById('ktp').textContent=tt>0?fmt(Math.round(tv/tt)):'—';
+}
+
+function showDet(loc){
+  selName=loc.n;
+  const col=ZC[loc.zona]||'#888780';
+  document.getElementById('d-dot').style.background=col;
+  document.getElementById('d-name').textContent=`${PI[loc.pos]||''} ${loc.n}`;
+  document.getElementById('d-zone').textContent=`${loc.zona} · ${loc.pos}`;
+  document.getElementById('d-addr').textContent=loc.addr;
+  document.getElementById('d-v').textContent=fmt(loc.v);
+  document.getElementById('d-t').textContent=fN(loc.t);
+  document.getElementById('d-tp').textContent=fmt(Math.round(loc.v/loc.t));
+  document.getElementById('d-u').textContent=fN(loc.u);
+
+  const ctx=document.getElementById('d-chart').getContext('2d');
+  if(dChart) dChart.destroy();
+  const maxM=Math.max(...loc.meses);
+  dChart=new Chart(ctx,{
+    type:'bar',
+    data:{labels:ML,datasets:[{
+      data:loc.meses,
+      backgroundColor:loc.meses.map(v=>v===maxM?col:col+'50'),
+      borderRadius:3,borderWidth:0
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)}}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:8},color:'#b4b2a9'}},y:{display:false}}
+    }
+  });
+
+  document.getElementById('det').classList.add('vis');
+  map.flyTo([loc.lat,loc.lng],14,{duration:1.2});
+  render(); // re-render para highlight
+  // scroll en lista
+  const fl=filtered();
+  const idx=fl.findIndex(l=>l.n===loc.n);
+  if(idx>=0){
+    const el=document.getElementById(`lc_${idx}`);
+    if(el) el.scrollIntoView({block:'nearest',behavior:'smooth'});
+  }
+}
+
+function selectL(name){
+  const loc=LOCS.find(l=>l.n===name);
+  if(loc) showDet(loc);
+}
+
+function closeDet(){
+  selName=null;
+  document.getElementById('det').classList.remove('vis');
+  if(dChart){dChart.destroy();dChart=null;}
+  map.flyTo([-34.72,-58.45],10,{duration:1});
+  render();
+}
+
+function fZ(z,el){document.querySelectorAll('#zc .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');cZ=z;render();}
+function fP(p,el){document.querySelectorAll('#pc .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');cP=p;render();}
+function fM(m,el){document.querySelectorAll('.mb').forEach(b=>b.classList.remove('on'));el.classList.add('on');cM=m;render();}
+
+render();
+</script>
+</body>
+</html>
