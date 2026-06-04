@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P2 · Productos — C&E Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0D0D0D;--bg2:#141414;--bg3:#1A1A1A;--bg4:#212121;--green:#00923F;--green2:#00C853;--green3:#33A85A;--green4:#1B5E20;--greendim:#00923F22;--greenborder:#00923F55;--text:#F0F0F0;--text2:#A0A0A0;--text3:#606060;--border:#1E1E1E;--border2:#2A2A2A;--radius:10px;--radius-sm:6px}
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh;padding:16px}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);border:0.5px solid var(--border2)}
+.logo{background:var(--green);color:#fff;font-size:12px;font-weight:700;padding:4px 9px;border-radius:var(--radius-sm)}
+.ht{font-size:14px;font-weight:600;color:var(--text);margin-left:10px}
+.hs{font-size:10px;color:var(--text2);margin-left:10px;margin-top:1px}
+.ptag{font-size:10px;padding:2px 9px;border-radius:99px;background:var(--greendim);color:var(--green);border:0.5px solid var(--greenborder)}
+.filters{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.fl{font-size:10px;color:var(--text3);margin-right:3px}
+.chip{font-size:10px;padding:2px 8px;border-radius:99px;background:var(--bg3);color:var(--text2);border:0.5px solid var(--border2);cursor:pointer;transition:all .15s}
+.chip.on{background:var(--green);color:#fff;border-color:var(--green)}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.kpi{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);padding:12px 14px;position:relative;overflow:hidden}
+.kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--green)}
+.kl{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.kv{font-size:20px;font-weight:700;color:var(--text)}
+.ks{font-size:9px;color:var(--text3);margin-top:3px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.row-bot{display:grid;grid-template-columns:1fr 2fr;gap:10px}
+.card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);padding:13px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.ct{font-size:10px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
+.cb{font-size:9px;padding:2px 7px;border-radius:99px;background:var(--greendim);color:var(--green);border:0.5px solid var(--greenborder)}
+.treemap{display:flex;flex-wrap:wrap;gap:3px;height:165px;align-content:flex-start;overflow:hidden}
+.tm{border-radius:5px;display:flex;flex-direction:column;justify-content:flex-end;padding:6px 7px;cursor:pointer;transition:opacity .15s}
+.tm:hover{opacity:.8}
+.tm-n{font-size:10px;font-weight:600;color:#fff;line-height:1.2}
+.tm-v{font-size:9px;color:rgba(255,255,255,.7);margin-top:2px}
+.bar-row{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.bar-label{font-size:10px;color:var(--text2);width:90px;text-align:right;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;background:var(--bg4);border-radius:3px;height:14px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--green4),var(--green))}
+.bar-val{font-size:10px;color:var(--text2);width:50px;text-align:right;flex-shrink:0}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;padding:3px 5px;border-bottom:0.5px solid var(--border2);font-weight:400;text-align:left}
+.tbl td{font-size:10px;color:var(--text);padding:4px 5px}
+.tbl tr:not(:last-child) td{border-bottom:0.5px solid var(--border)}
+.tbl td.r{text-align:right}
+.pct-badge{font-size:9px;padding:1px 5px;border-radius:99px;background:var(--greendim);color:var(--green)}
+.rk{display:inline-block;width:15px;height:15px;border-radius:3px;background:var(--greendim);color:var(--green);font-size:8px;font-weight:600;text-align:center;line-height:15px}
+.rk.t{background:var(--green);color:#fff}
+</style>
+</head>
+<body>
+<div class="header">
+  <div style="display:flex;align-items:center">
+    <div class="logo">C&E</div>
+    <div><div class="ht">Análisis de Productos</div><div class="hs">Jerarquía Grupo → Tipo → Artículo · Marca · 2024</div></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="ptag">Página 2 / 5</div>
+  </div>
+</div>
+
+<div class="filters">
+  <span class="fl">GRUPO:</span>
+  <span class="chip on" onclick="setG('todos',this)">Todos</span>
+  <span class="chip" onclick="setG('CELULARES',this)">Celulares</span>
+  <span class="chip" onclick="setG('SMART Y TV',this)">Smart TV</span>
+  <span class="chip" onclick="setG('LINEA BLANCA',this)">Línea Blanca</span>
+  <span class="chip" onclick="setG('VENTILADORES',this)">Ventiladores</span>
+  <span class="chip" onclick="setG('HORNOS Y COCINAS',this)">Hornos</span>
+  <span class="chip" onclick="setG('HOGAR COCINA',this)">Hogar</span>
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi"><div class="kl">Total ventas</div><div class="kv" id="kv1">$12.651M</div><div class="ks">año completo</div></div>
+  <div class="kpi"><div class="kl">Unidades</div><div class="kv" id="kv2">142.042</div><div class="ks">vendidas</div></div>
+  <div class="kpi"><div class="kl">Precio promedio</div><div class="kv" id="kv3">$89.067</div><div class="ks">por unidad</div></div>
+  <div class="kpi"><div class="kl">Artículos distintos</div><div class="kv" id="kv4">72+</div><div class="ks">grupos activos</div></div>
+</div>
+
+<div class="row2">
+  <div class="card">
+    <div class="card-header"><div class="ct">Ventas por grupo (Treemap)</div></div>
+    <div class="treemap" id="treemap"></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="ct">Top artículos por ventas</div></div>
+    <div id="top-art"></div>
+  </div>
+</div>
+
+<div class="row-bot">
+  <div class="card">
+    <div class="card-header"><div class="ct">% ventas por marca</div></div>
+    <canvas id="donutMarca" height="160"></canvas>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="ct">Detalle top artículos</div></div>
+    <table class="tbl">
+      <thead><tr><th>#</th><th>Artículo</th><th>Grupo</th><th>Marca</th><th class="r">Ventas</th><th class="r">Unid.</th><th class="r">% total</th></tr></thead>
+      <tbody id="tbl-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const GRUPOS=[
+  {g:'CELULARES',v:4172498813,u:19039,c:'#00923F'},
+  {g:'SMART Y TV',v:1839922093,u:5041,c:'#00C853'},
+  {g:'LINEA BLANCA',v:1729743925,u:4973,c:'#33A85A'},
+  {g:'HORNOS Y COCINAS',v:919722440,u:5422,c:'#1B5E20'},
+  {g:'HOGAR COCINA',v:916035290,u:14734,c:'#004D20'},
+  {g:'S/G',v:645299281,u:44130,c:'#2E7D32'},
+  {g:'VENTILADORES',v:625290209,u:12116,c:'#388E3C'},
+  {g:'PARLANTES',v:291821252,u:2087,c:'#43A047'},
+  {g:'SELF CARE',v:288263324,u:9422,c:'#4CAF50'},
+  {g:'CLIMATIZACION',v:199316501,u:3559,c:'#66BB6A'},
+  {g:'ELECTROAUDIO',v:176919647,u:1490,c:'#81C784'},
+  {g:'SMART',v:106918552,u:1935,c:'#A5D6A7'},
+];
+const ARTS=[
+  {n:'KANJI VENTILADOR 18 3 EN 1',g:'VENTILADORES',m:'KANJI',v:365246368,u:8551},
+  {n:'KANJI 40 LED HD SMART 4XTL005-2',g:'SMART Y TV',m:'KANJI',v:322202345,u:998},
+  {n:'KANJI SMART TV KJ-32MT005-2',g:'SMART Y TV',m:'KANJI',v:249971377,u:972},
+  {n:'KANJI LAVASECARROPAS XPB55-655S',g:'LINEA BLANCA',m:'KANJI',v:198913034,u:644},
+  {n:'KANJI SMART TV 50 LED 4K',g:'SMART Y TV',m:'KANJI',v:175674721,u:371},
+  {n:'REDMI 13C 4+128 NAVY BLUE',g:'CELULARES',m:'XIAOMI',v:186171166,u:536},
+  {n:'ZTE BLADE V50 DIAMOND BLACK',g:'CELULARES',m:'ZTE',v:139249716,u:413},
+  {n:'ZTE BLADE A73 SPACE BLACK',g:'CELULARES',m:'ZTE',v:134299503,u:532},
+  {n:'ZTE BLADE A53 PLUS GRAY',g:'CELULARES',m:'ZTE',v:129095936,u:970},
+  {n:'N52 6.5 2GB+64GB NEGRO',g:'CELULARES',m:'NOBLEX',v:120489418,u:717},
+];
+const MARCAS=[
+  {m:'KANJI',v:2524875492,c:'#00923F'},{m:'MOTOROLA',v:1048192919,c:'#00C853'},
+  {m:'ZTE',v:948627832,c:'#33A85A'},{m:'SAMSUNG',v:801936344,c:'#1B5E20'},
+  {m:'NOBLEX',v:554895253,c:'#004D20'},{m:'SIN MARCA',v:518617009,c:'#2E7D32'},
+  {m:'LILIANA',v:476936915,c:'#388E3C'},{m:'ENOVA',v:426438786,c:'#43A047'}
+];
+
+const fmt=v=>v>=1e9?'$'+(v/1e9).toFixed(2)+'B':v>=1e6?'$'+(v/1e6).toFixed(1)+'M':'$'+(v/1e3).toFixed(0)+'K';
+const fN=v=>new Intl.NumberFormat('es-AR').format(Math.round(v));
+const totalAll=GRUPOS.reduce((s,d)=>s+d.v,0);
+let donut;
+
+function buildTreemap(data){
+  const tot=data.reduce((s,d)=>s+d.v,0);
+  document.getElementById('treemap').innerHTML=data.slice(0,10).map(d=>{
+    const pct=d.v/tot;
+    const w=Math.max(pct*100,8);
+    const h=Math.max(pct>0.15?85:pct>0.08?65:pct>0.04?48:34,28);
+    return `<div class="tm" style="width:${w}%;height:${h}px;background:${d.c}" title="${d.g}: ${fmt(d.v)}">
+      <div class="tm-n">${d.g.split(' ').slice(0,2).join(' ')}</div>
+      <div class="tm-v">${fmt(d.v)}</div>
+    </div>`;
+  }).join('');
+}
+
+function buildTopArt(data){
+  const maxV=Math.max(...data.map(d=>d.v));
+  document.getElementById('top-art').innerHTML=data.slice(0,8).map(d=>`
+    <div class="bar-row">
+      <div class="bar-label" title="${d.n}">${d.n.split(' ').slice(0,3).join(' ')}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(d.v/maxV*100)}%"></div></div>
+      <div class="bar-val">${fmt(d.v)}</div>
+    </div>`).join('');
+}
+
+function buildDonut(){
+  const ctx=document.getElementById('donutMarca').getContext('2d');
+  if(donut)donut.destroy();
+  const total=MARCAS.reduce((s,d)=>s+d.v,0);
+  donut=new Chart(ctx,{type:'doughnut',data:{
+    labels:MARCAS.map(d=>d.m),
+    datasets:[{data:MARCAS.map(d=>d.v),backgroundColor:MARCAS.map(d=>d.c),borderWidth:0,hoverOffset:5}]
+  },options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
+    plugins:{legend:{display:true,position:'right',labels:{color:'#A0A0A0',boxWidth:7,font:{size:9},padding:6}},
+    tooltip:{callbacks:{label:c=>fmt(c.raw)+' ('+Math.round(c.raw/total*100)+'%)'}}}}});
+}
+
+function buildTable(data){
+  const tot=data.reduce((s,d)=>s+d.v,0);
+  document.getElementById('tbl-body').innerHTML=data.slice(0,8).map((d,i)=>`
+    <tr>
+      <td><span class="rk${i<3?' t':''}">${i+1}</span></td>
+      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d.n}">${d.n.split(' ').slice(0,4).join(' ')}</td>
+      <td style="font-size:9px;color:var(--text3)">${d.g}</td>
+      <td style="font-size:9px;color:var(--text3)">${d.m}</td>
+      <td class="r">${fmt(d.v)}</td>
+      <td class="r">${fN(d.u)}</td>
+      <td class="r"><span class="pct-badge">${(d.v/totalAll*100).toFixed(1)}%</span></td>
+    </tr>`).join('');
+}
+
+function setG(g,el){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  const arts=g==='todos'?ARTS:ARTS.filter(a=>a.g===g);
+  const grps=g==='todos'?GRUPOS:GRUPOS.filter(x=>x.g===g);
+  const tv=arts.reduce((s,d)=>s+d.v,0);
+  const tu=arts.reduce((s,d)=>s+d.u,0);
+  document.getElementById('kv1').textContent=fmt(tv);
+  document.getElementById('kv2').textContent=fN(tu);
+  document.getElementById('kv3').textContent=tu>0?fmt(Math.round(tv/tu)):'—';
+  buildTreemap(g==='todos'?GRUPOS:grps.length?grps:[{g,v:tv,u:tu,c:'#00923F'}]);
+  buildTopArt(arts);
+  buildTable(arts);
+}
+
+buildTreemap(GRUPOS);buildTopArt(ARTS);buildDonut();buildTable(ARTS);
+</script>
+</body>
+</html>
