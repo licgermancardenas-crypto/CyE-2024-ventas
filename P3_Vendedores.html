@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P3 · Vendedores — C&E Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0D0D0D;--bg2:#141414;--bg3:#1A1A1A;--bg4:#212121;--green:#00923F;--green2:#00C853;--green3:#33A85A;--green4:#1B5E20;--greendim:#00923F22;--greenborder:#00923F55;--text:#F0F0F0;--text2:#A0A0A0;--text3:#606060;--border:#1E1E1E;--border2:#2A2A2A;--radius:10px;--radius-sm:6px}
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh;padding:16px}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius);border:0.5px solid var(--border2)}
+.logo{background:var(--green);color:#fff;font-size:12px;font-weight:700;padding:4px 9px;border-radius:var(--radius-sm)}
+.ht{font-size:14px;font-weight:600;color:var(--text);margin-left:10px}
+.hs{font-size:10px;color:var(--text2);margin-left:10px;margin-top:1px}
+.ptag{font-size:10px;padding:2px 9px;border-radius:99px;background:var(--greendim);color:var(--green);border:0.5px solid var(--greenborder)}
+.filters{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.fl{font-size:10px;color:var(--text3);margin-right:3px}
+.chip{font-size:10px;padding:2px 8px;border-radius:99px;background:var(--bg3);color:var(--text2);border:0.5px solid var(--border2);cursor:pointer;transition:all .15s}
+.chip.on{background:var(--green);color:#fff;border-color:var(--green)}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.kpi{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);padding:12px 14px;position:relative;overflow:hidden}
+.kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--green)}
+.kl{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.kv{font-size:18px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ks{font-size:9px;color:var(--text3);margin-top:3px}
+.row-top{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.row-bot{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);padding:13px}
+.ct{font-size:10px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.bar-row{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.bar-label{font-size:10px;color:var(--text2);width:95px;text-align:right;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;background:var(--bg4);border-radius:3px;height:14px;overflow:hidden;position:relative}
+.bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--green4),var(--green))}
+.bar-pct{position:absolute;right:4px;top:0;font-size:8px;line-height:14px;color:rgba(255,255,255,.7)}
+.bar-val{font-size:10px;color:var(--text2);width:50px;text-align:right;flex-shrink:0}
+.medal{display:inline-block;width:16px;height:16px;border-radius:3px;font-size:8px;font-weight:600;text-align:center;line-height:16px;flex-shrink:0}
+.m1{background:#FFD700;color:#000}
+.m2{background:#A0A0A0;color:#000}
+.m3{background:#CD7F32;color:#fff}
+.mn{background:var(--greendim);color:var(--green)}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;padding:3px 4px;border-bottom:0.5px solid var(--border2);font-weight:400;text-align:left}
+.tbl td{font-size:10px;color:var(--text);padding:4px 4px}
+.tbl tr:not(:last-child) td{border-bottom:0.5px solid var(--border)}
+.tbl td.r{text-align:right;font-variant-numeric:tabular-nums}
+.pct-g{color:var(--green2);font-size:9px;font-weight:500}
+
+/* ── RESPONSIVE FIX ── */
+body { min-height: 100vh; padding: 12px; }
+.kpi-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important; }
+.row2 { grid-template-columns: 1fr !important; }
+.row3 { grid-template-columns: 1fr !important; }
+.row-main { grid-template-columns: 1fr !important; }
+.row-top { grid-template-columns: 1fr !important; }
+.row-bot { grid-template-columns: 1fr !important; }
+.row-mid { grid-template-columns: 1fr !important; }
+.zona-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important; }
+.controls { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important; }
+@media (min-width: 900px) {
+  .row2    { grid-template-columns: 2fr 1fr !important; }
+  .row3    { grid-template-columns: 1fr 1fr 1fr !important; }
+  .row-main{ grid-template-columns: 1fr 1fr !important; }
+  .row-top { grid-template-columns: 1fr 1fr !important; }
+  .row-bot { grid-template-columns: 1fr 1fr !important; }
+  .row-mid { grid-template-columns: 1fr 1fr !important; }
+  .zona-grid{ grid-template-columns: repeat(5,1fr) !important; }
+  .controls { grid-template-columns: 1fr 1fr 1fr 1fr !important; }
+}
+canvas { max-width: 100% !important; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div style="display:flex;align-items:center">
+    <div class="logo">C&E</div>
+    <div><div class="ht">Performance por Vendedor</div><div class="hs">Ranking · evolución mensual · dispersión · 2024</div></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="ptag">Página 3 / 5</div>
+  </div>
+</div>
+
+<div class="filters">
+  <span class="fl">VISTA:</span>
+  <span class="chip on" onclick="setV('top10',this)">Top 10</span>
+  <span class="chip" onclick="setV('top20',this)">Top 20</span>
+  <span class="chip" onclick="setV('todos',this)">Todos</span>
+  <span style="width:1px;height:14px;background:var(--border2);margin:0 4px"></span>
+  <span class="fl">PERÍODO:</span>
+  <span class="chip on" onclick="setP('todos',this)">Año completo</span>
+  <span class="chip" onclick="setP('H1',this)">H1 (Ene–Jun)</span>
+  <span class="chip" onclick="setP('H2',this)">H2 (Jul–Dic)</span>
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi"><div class="kl">Vendedores activos</div><div class="kv">120+</div><div class="ks">con ventas en 2024</div></div>
+  <div class="kpi"><div class="kl">Líder total</div><div class="kv">MERCADO LIBRE</div><div class="ks" id="klv">$2.316M · 23.759 tickets</div></div>
+  <div class="kpi"><div class="kl">Ticket prom. top 10</div><div class="kv" id="ktp">$88.500</div><div class="ks">por transacción</div></div>
+  <div class="kpi"><div class="kl">Unidades/ticket prom.</div><div class="kv">~1.0</div><div class="ks">top 10 vendedores</div></div>
+</div>
+
+<div class="row-top">
+  <div class="card">
+    <div class="ct">Ranking por ventas totales</div>
+    <div id="ranking-bars"></div>
+  </div>
+  <div class="card">
+    <div class="ct">Evolución mensual — top 5</div>
+    <canvas id="lineChart" height="200"></canvas>
+  </div>
+</div>
+
+<div class="row-bot">
+  <div class="card">
+    <div class="ct">Tickets vs ticket promedio</div>
+    <canvas id="scatterChart" height="170"></canvas>
+  </div>
+  <div class="card">
+    <div class="ct">Detalle ranking</div>
+    <table class="tbl">
+      <thead><tr><th>#</th><th>Vendedor</th><th class="r">Ventas</th><th class="r">Tickets</th><th class="r">T.prom</th><th class="r">% total</th></tr></thead>
+      <tbody id="tbl-vend"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const VEND=[
+  {n:'MERCADO LIBRE',v:2316836555,t:23759,u:23135},
+  {n:'DOMINGO CINTIA',v:1005237085,t:7866,u:12750},
+  {n:'FLAVIA CASADO',v:330124999,t:3249,u:3065},
+  {n:'MIRIAM SANCHEZ',v:281544554,t:3651,u:3520},
+  {n:'LORELEY DEL VALLE',v:243594507,t:3161,u:2946},
+  {n:'DANIEL AGUIRRE',v:234621449,t:2269,u:2232},
+  {n:'LUCAS VIERO',v:233188236,t:2918,u:2902},
+  {n:'PATRICIA GIL',v:228214953,t:2372,u:2165},
+  {n:'ANTONELA BENITEZ',v:226364380,t:2816,u:2783},
+  {n:'VALENTINA BOLAÑEZ',v:222585561,t:3876,u:3604},
+  {n:'YANET RUIZ',v:219048784,t:2166,u:2034},
+  {n:'KAREN GALVÁN',v:214179409,t:2343,u:2228},
+  {n:'ELIANA DIEZ',v:207249583,t:2566,u:2768},
+  {n:'LEONEL TORRES',v:206618099,t:2646,u:2639},
+  {n:'MARTHA LOPEZ',v:205371007,t:2056,u:1847},
+];
+const EVOL={
+  'MERCADO LIBRE':[43408750,147038185,142363034,117594054,177523964,162636514,197929509,192056898,187205924,252963005,328923738,367192973],
+  'DOMINGO CINTIA':[39155531,38320026,44270378,56323936,76725068,95749647,101117069,123865316,126644397,100160535,101969715,100935462],
+  'FLAVIA CASADO':[6430726,14091753,14368513,13788741,19705802,26603802,35209460,56430873,47283179,34528799,27700430,33982916],
+  'MIRIAM SANCHEZ':[8808978,11676249,13940178,10658994,17852057,21034319,30588693,27760576,32717989,32753344,35069930,38683242],
+  'LORELEY DEL VALLE':[8220910,6037977,12897971,10787660,14838216,18859890,24949354,31905705,32456544,29667931,24187212,28785129]
+};
+const ML=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const COLS=['#00923F','#00C853','#33A85A','#1B5E20','#66BB6A'];
+const QQ={todos:[0,1,2,3,4,5,6,7,8,9,10,11],H1:[0,1,2,3,4,5],H2:[6,7,8,9,10,11]};
+const fmt=v=>v>=1e9?'$'+(v/1e9).toFixed(2)+'B':v>=1e6?'$'+(v/1e6).toFixed(1)+'M':'$'+(v/1e3).toFixed(0)+'K';
+const fN=v=>new Intl.NumberFormat('es-AR').format(Math.round(v));
+const totalAll=VEND.reduce((s,d)=>s+d.v,0);
+let lineChart,scatterChart,cV='top10',cP='todos';
+
+function getData(){
+  const n=cV==='top10'?10:cV==='top20'?15:VEND.length;
+  return VEND.slice(0,n);
+}
+
+function buildRanking(data){
+  const maxV=data[0].v;const tot=data.reduce((s,d)=>s+d.v,0);
+  document.getElementById('ranking-bars').innerHTML=data.slice(0,10).map((d,i)=>`
+    <div class="bar-row">
+      <div class="bar-label" title="${d.n}">${d.n.split(' ').slice(0,2).join(' ')}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${Math.round(d.v/maxV*100)}%;background:${i===0?'#00923F':i<3?'#00C853':'#00923F66'}"></div>
+        <span class="bar-pct">${(d.v/tot*100).toFixed(1)}%</span>
+      </div>
+      <div class="bar-val">${fmt(d.v)}</div>
+    </div>`).join('');
+}
+
+function buildLine(periodo){
+  const ctx=document.getElementById('lineChart').getContext('2d');
+  if(lineChart)lineChart.destroy();
+  const ix=QQ[periodo];const labels=ix.map(i=>ML[i]);
+  lineChart=new Chart(ctx,{type:'line',data:{labels,
+    datasets:Object.keys(EVOL).map((k,i)=>({
+      label:k.split(' ')[0],data:ix.map(idx=>EVOL[k][idx]),
+      borderColor:COLS[i],backgroundColor:'transparent',
+      borderWidth:1.5,pointRadius:2,tension:0.3
+    }))
+  },options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:true,position:'bottom',labels:{color:'#A0A0A0',boxWidth:7,font:{size:9},padding:7}}},
+    scales:{
+      x:{grid:{color:'#1E1E1E'},ticks:{color:'#606060',font:{size:9}},border:{color:'#2A2A2A'}},
+      y:{grid:{color:'#1E1E1E'},ticks:{color:'#606060',font:{size:9},callback:v=>'$'+Math.round(v/1e6)+'M'},border:{color:'#2A2A2A'}}
+    }
+  }});
+}
+
+function buildScatter(data){
+  const ctx=document.getElementById('scatterChart').getContext('2d');
+  if(scatterChart)scatterChart.destroy();
+  const pts=data.slice(0,15).map(d=>({x:d.t,y:Math.round(d.v/d.t),r:Math.max(4,Math.sqrt(d.v/5e6)),label:d.n.split(' ')[0]}));
+  scatterChart=new Chart(ctx,{type:'bubble',data:{datasets:[{
+    data:pts,
+    backgroundColor:pts.map((_,i)=>i===0?'#00923Fcc':i===1?'#00C853cc':'#00923F55'),
+    borderWidth:0
+  }]},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${pts[c.dataIndex].label}: ${fN(c.raw.x)} tkts · ${fmt(c.raw.y)} prom`}}},
+    scales:{
+      x:{title:{display:true,text:'Tickets',color:'#606060',font:{size:9}},grid:{color:'#1E1E1E'},ticks:{color:'#606060',font:{size:9}},border:{color:'#2A2A2A'}},
+      y:{title:{display:true,text:'Ticket prom.',color:'#606060',font:{size:9}},grid:{color:'#1E1E1E'},ticks:{color:'#606060',font:{size:9},callback:v=>'$'+Math.round(v/1e3)+'K'},border:{color:'#2A2A2A'}}
+    }
+  }});
+}
+
+function buildTable(data){
+  document.getElementById('tbl-vend').innerHTML=data.slice(0,10).map((d,i)=>`
+    <tr>
+      <td><span class="medal ${i===0?'m1':i===1?'m2':i===2?'m3':'mn'}">${i+1}</span></td>
+      <td style="max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.n.split(' ').slice(0,2).join(' ')}</td>
+      <td class="r">${fmt(d.v)}</td>
+      <td class="r">${fN(d.t)}</td>
+      <td class="r">${fmt(Math.round(d.v/d.t))}</td>
+      <td class="r"><span class="pct-g">${(d.v/totalAll*100).toFixed(1)}%</span></td>
+    </tr>`).join('');
+}
+
+function refresh(){const d=getData();buildRanking(d);buildTable(d);buildScatter(d);}
+function setV(v,el){document.querySelectorAll('.chip').forEach(c=>{if(['Top 10','Top 20','Todos'].includes(c.textContent))c.classList.remove('on')});el.classList.add('on');cV=v;refresh();}
+function setP(p,el){document.querySelectorAll('.chip').forEach(c=>{if(['Año completo','H1 (Ene–Jun)','H2 (Jul–Dic)'].includes(c.textContent))c.classList.remove('on')});el.classList.add('on');cP=p;buildLine(p);refresh();}
+
+refresh();buildLine('todos');
+</script>
+</body>
+</html>

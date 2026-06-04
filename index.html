@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>C&E · Dashboard Facturación 2024</title>
+<style>
+:root{--bg:#0D0D0D;--bg2:#141414;--bg3:#1A1A1A;--green:#00923F;--green2:#00C853;--text:#F0F0F0;--text2:#A0A0A0;--border2:#2A2A2A}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.topnav{background:var(--bg2);border-bottom:0.5px solid var(--border2);display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:50px;flex-shrink:0;gap:8px;position:sticky;top:0;z-index:999}
+.logo-wrap{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.logo{background:var(--green);color:#fff;font-size:12px;font-weight:700;padding:4px 9px;border-radius:5px}
+.brand{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap}
+.nav-tabs{display:flex;gap:2px;align-items:center;flex:1;justify-content:center;flex-wrap:wrap}
+.tab{font-size:11px;padding:5px 11px;border-radius:5px;cursor:pointer;color:var(--text2);border:0.5px solid transparent;transition:all .15s;white-space:nowrap;text-decoration:none;display:flex;align-items:center;gap:4px}
+.tab:hover{background:var(--bg3);color:var(--text)}
+.tab.active{background:var(--green);color:#fff}
+.tab-num{font-size:9px;opacity:.65}
+.date-badge{font-size:10px;color:var(--text2);padding:3px 9px;border-radius:99px;background:var(--bg3);border:0.5px solid var(--border2);white-space:nowrap;flex-shrink:0}
+/* FRAME */
+.frame-wrap{flex:1;width:100%;overflow:hidden}
+iframe{width:100%;height:calc(100vh - 50px);border:none;display:block;background:var(--bg)}
+/* LOADING */
+.loading{display:none;position:fixed;inset:50px 0 0 0;background:var(--bg);align-items:center;justify-content:center;flex-direction:column;gap:14px;z-index:100}
+.loading.show{display:flex}
+.spinner{width:30px;height:30px;border:2px solid #1E1E1E;border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite}
+.lt{font-size:11px;color:var(--text2)}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="topnav">
+  <div class="logo-wrap">
+    <div class="logo">C&amp;E</div>
+    <span class="brand">Dashboard 2024</span>
+  </div>
+  <nav class="nav-tabs">
+    <a class="tab active" onclick="go(0,this);return false" href="#">
+      <span class="tab-num">01</span>Resumen
+    </a>
+    <a class="tab" onclick="go(1,this);return false" href="#">
+      <span class="tab-num">02</span>Productos
+    </a>
+    <a class="tab" onclick="go(2,this);return false" href="#">
+      <span class="tab-num">03</span>Vendedores
+    </a>
+    <a class="tab" onclick="go(3,this);return false" href="#">
+      <span class="tab-num">04</span>Geográfico
+    </a>
+    <a class="tab" onclick="go(4,this);return false" href="#">
+      <span class="tab-num">05</span>Mapa
+    </a>
+  </nav>
+  <div class="date-badge">2024 · $12.651M</div>
+</div>
+
+<div class="loading" id="loading">
+  <div class="spinner"></div>
+  <div class="lt" id="lt">Cargando...</div>
+</div>
+
+<div class="frame-wrap">
+  <iframe id="fr" src="P1_Resumen_Ejecutivo.html" onload="done()"></iframe>
+</div>
+
+<script>
+const P=[
+  {f:'P1_Resumen_Ejecutivo.html', l:'Resumen Ejecutivo'},
+  {f:'P2_Productos.html',         l:'Productos'},
+  {f:'P3_Vendedores.html',        l:'Vendedores'},
+  {f:'P4_Geografico.html',        l:'Geográfico'},
+  {f:'P5_Mapa.html',              l:'Mapa GBA + CABA'},
+];
+function go(i,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('lt').textContent='Cargando '+P[i].l+'...';
+  document.getElementById('loading').classList.add('show');
+  document.getElementById('fr').src=P[i].f;
+}
+function done(){document.getElementById('loading').classList.remove('show');}
+document.addEventListener('keydown',e=>{
+  const tabs=document.querySelectorAll('.tab');
+  const a=Array.from(tabs).findIndex(t=>t.classList.contains('active'));
+  if(e.key==='ArrowRight'&&a<tabs.length-1)tabs[a+1].click();
+  if(e.key==='ArrowLeft'&&a>0)tabs[a-1].click();
+});
+</script>
+</body>
+</html>
